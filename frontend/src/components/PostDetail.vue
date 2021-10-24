@@ -49,16 +49,17 @@
 <script>
   import axios from 'axios';
   export default {
-    name: 'HelloWorld',
+    // name: 'HelloWorld',
 
     data: () => ({
       //json 형식의 데이터가 들어갈 수 있도록 빈 변수를 객체 형태롤 만들어준다.
       post: {},
       tagCloud: [],
     }),
+
     created() {
       console.log("created()...");
-      const postId = location.pathname.split('/')[3] || 2;
+      const postId = location.pathname.split('/')[3];
       this.fetchPostDetail(postId);
       this.fetchTagCloud();
     },
