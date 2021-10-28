@@ -8,20 +8,21 @@ module.exports = {
 
   devServer: {
     index: 'home.html',
-    proxy: 'http://127.0.0.1:8000', 
+    proxy: 'http://127.0.0.1:8000',
   },
 
   outputDir: 'dist',
   publicPath: '/',
   assetsDir: 'static',
 
+
   pages:{
     home: {
-      template: 'public/index.html', 
-      entry: 'src/pages/main_home.js', 
-      filename: 'home.html', 
-      title: 'VueDjangoPhoto/home.html', 
-      minify: false, 
+      template: 'public/index.html',
+      entry: 'src/pages/main_home.js',
+      filename: 'home.html',
+      title: 'VueDjangoPhoto/home.html',
+      minify: false,
     },
     post_list: {
       template: 'public/index.html', 
@@ -37,8 +38,16 @@ module.exports = {
       title: 'VueDjangoPhoto/post_detail.html', 
       minify: false, 
     },
+    post_scrap: {
+      template: 'public/index.html', 
+      entry: 'src/pages/main_post_scrap.js', 
+      filename: 'post_scrap.html', 
+      title: 'VueDjangoPhoto/post_scrap.html', 
+      minify: false, 
+    },
   },
 
+  
   configureWebpack: {
     plugins: [
       new FileManagerPlugin({

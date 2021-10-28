@@ -25,7 +25,6 @@ from api.views_util import obj_to_post, prev_next_post, make_tag_cloud
 class ApiPostLV(BaseListView):
     # model = Post
     def get_queryset(self):
-        # request.GET에 쿼리스트링이 존재하고, 딕셔너리 타입이므로 get함수를 이용하여 추출할 수 있다. 없다면 널 반환
         tagname = self.request.GET.get('tagname')
         if tagname:
             qs = Post.objects.filter(tags__name=tagname)
@@ -42,7 +41,6 @@ class ApiPostDV(BaseDetailView):
     model = Post
 
     def render_to_response(self, context, **response_kwargs):
-
         obj = context['object']
         post = obj_to_post(obj)
         post['prev'], post['next'] = prev_next_post(obj)
@@ -53,12 +51,8 @@ class ApiTagCloudLV(BaseListView):
     # model = Tag
     queryset = Tag.objects.annotate(count=Count('post'))
 
-    # def get_queryset(self):
-    #     return Tag.objects.all()
-
     def render_to_response(self, context, **response_kwargs):
         qs = context['object_list']
-
         tagList = make_tag_cloud(qs)
         return JsonResponse(data=tagList, safe=False, status=200)
 
@@ -110,7 +104,6 @@ class ApimeView(View):
     def get(self, request, *args, **kwargs):
         user = get_user(request)
 
-        # 해당 사용자가 로그인이 되어있으면
         if user.is_authenticated:
             userDict = {
                 'id': user.id,
@@ -123,7 +116,6 @@ class ApimeView(View):
 
         return JsonResponse(data=userDict, safe=True, status=200)
 
-# LoginRequiredMixin 클래스에 있는 dispatch 함수를 오버라이딩하여 권한 설정을 한다. (현재 accounts.views에 존재함)
 class ApiPostCV(MyLoginRequiredMixin, BaseCreateView):
     model = Post
     fields = '__all__'
@@ -150,10 +142,56 @@ class ApiPostUV(OwnerOnlyMixin, BaseUpdateView):
         return JsonResponse(data=form.errors, safe=True, status=400)
 
 class ApiPostDelV(OwnerOnlyMixin, BaseDeleteView):
-    # 지우는 과정을 할 때도, model 정의를 하여 어떤 디비의 레코드를 지우는지 장고가 알게 해줘야 한다.
     model = Post
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
         self.object.delete()
         return JsonResponse(data={}, safe=True, status=204)
+
+class ApiPostScrapLV(MyLoginRequiredMixin, BaseListView):
+    def get_queryset(self):
+        username = self.request.user.username
+        qs = Post.objects.filter(scrap__username=username)
+        return qs
+
+    def render_to_response(self, context, **response_kwargs):
+        qs = context['object_list']
+        postList = [obj_to_post(obj) for obj in qs]
+        return JsonResponse(data=postList, safe=False, status=200)
+
+class ApiPostScrapDView(View):
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse(data={'errmsg': 'you should login first!'}, safe=True, status=401)
+        else:
+            if 'post_id' in kwargs:
+                post_id = kwargs['post_id']
+                print(post_id)
+                post = Post.objects.get(pk=post_id)
+                print(post)
+                user = request.user
+                if user in post.scrap.all():
+                    post.scrap.remove(user)
+                    return JsonResponse(data={'successmsg': 'unscrapped!'}, safe=True, status=200)
+                else:
+                    return JsonResponse(data={'errmsg': 'Already unscrapped.'}, safe=True, status=401)
+
+
+class ApiPostScrapAddView(View):
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse(data={'errmsg':'you should login first!'}, safe=True, status=401)
+        else:
+            if 'post_id' in kwargs:
+                post_id = kwargs['post_id']
+                print(post_id)
+                post = Post.objects.get(pk=post_id)
+                print(post)
+                user = request.user
+                if user in post.scrap.all():
+                    return JsonResponse(data={'errmsg':'Already scrapped.'}, safe=True, status=401)
+                else:
+                    post.scrap.add(user)
+                    return JsonResponse(data={'successmsg':'scrapped!'}, safe=True, status=200)
+

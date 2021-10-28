@@ -2,7 +2,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin, AccessMixin
 from django.http import JsonResponse
 
 
-
 class MyLoginRequiredMixin(LoginRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -10,7 +9,6 @@ class MyLoginRequiredMixin(LoginRequiredMixin):
             return JsonResponse(data=data, safe=True, status=401)
 
         return super().dispatch(request, *args, **kwargs)
-
 
 class OwnerOnlyMixin(AccessMixin):
     def dispatch(self, request, *args, **kwargs):

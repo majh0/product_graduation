@@ -8,7 +8,6 @@
       :items-per-page="5"
       @click:row="serverPage"
     >
-      <!-- 테이블위에 표시할 내용이 있으면 여기에다가 한다. -->
       <template v-slot:top>
         <v-toolbar flat>
           <v-toolbar-title
@@ -32,9 +31,11 @@
         <v-icon small class="mr-2" @click.stop="dialogOpen('update', item)">
           mdi-pencil
         </v-icon>
+        <v-icon small class="mr-2" @click.stop="addScrap(item)">
+          mdi-plus
+        </v-icon>
         <v-icon small @click.stop="deletePost(item)"> mdi-delete </v-icon>
       </template>
-      <!-- 테이블에 내용이 없으면 보여줄 내용을 정의한다. -->
       <template v-slot:no-data>
         <v-btn color="primary" @click="fetchPostList"> Reset </v-btn>
       </template>
@@ -45,7 +46,6 @@
         <v-card-title>
           <span class="text-h5">{{ formTitle }}</span>
         </v-card-title>
-        <!-- form의 각 필드를 채워줄 때는 value 속성을 이용한다. -->
         <v-card-text>
           <v-form id="post-form" ref="postForm">
             <v-text-field name="id" label="ID" v-model="editedItem.id" readonly></v-text-field>
@@ -70,7 +70,6 @@
 import axios from "axios";
 import EventBus from './event_bus';
 export default {
-  // name: "HelloWorld",
   data: () => ({
     dialog: false,
     dialogDelete: false,
@@ -81,7 +80,6 @@ export default {
         sortable: false,
         value: "id",
       },
-      //텍스트는 화면에 출려되는 문자열, vlaue는 이 컬럼에 데이터가 들어있는 변수명
       { text: "제 목", value: "title" },
       { text: "요 약", value: "description" },
       { text: "수정일", value: "modify_dt" },
@@ -98,7 +96,6 @@ export default {
   }),
   computed: {
     formTitle() {
-      // return this.editedIndex === -1 ? "Create Item" : "Update Item";
       if (this.actionKind === 'create') return 'Create Item';
       else return 'Update Item';
     },
@@ -107,9 +104,6 @@ export default {
     const params = new URL(location).searchParams;
     this.tagname = params.get("tagname");
     this.fetchPostList();
-
-    // me_change라는 이벤트를 수신하면, 이 함수를 실행하라는 의미이다. val은 이벤트 버스로 받은 값을 의미한다.
-    // 엄밀히 말하면, 이벤트를 수신하는 것이 아닌, 이벤트와 그 핸들러를 등록하는 것이다.
     EventBus.$on('me_change', (val)=>{
       this.me = val;
     });
@@ -133,7 +127,6 @@ export default {
           alert(err.response, status + "" + err.response.statusText);
         });
     },
-
     serverPage(item) {
       console.log("serverPage()...", item);
       location.href = `/blog/post/${item.id}`;
@@ -151,8 +144,8 @@ export default {
         this.editedItem = {};
       }
       else{
-        this.editedIndex = this.posts.indexOf(item); // 현재 아이템의 인덱스를 구하는 코드
-        this.editedItem = Object.assign({}, item); // 앞에있는 객체를 기준으로 뒤에있는 객체를 앞쳐준다. 그리고 그것을 editedItem에 넣어준다.
+        this.editedIndex = this.posts.indexOf(item);
+        this.editedItem = Object.assign({}, item); 
       }
       this.dialog = true;
     },
@@ -212,6 +205,27 @@ export default {
       })
       .catch(err =>{
         console.log("DELETE POST ERR.RESPONSE", err.response);
+        alert(err.response.status + '' + err.response.statusText);
+      });
+    },
+    addScrap(item){
+      console.log("addScrap()...", item);
+      if(this.me.username ==='Anonymous'){
+        alert("Please login first!");
+        return;
+      }
+      axios.get(`/api/post/${item.id}/scrap/add/`)
+      .then(res =>{
+        console.log("SCRAP ADD GET RES",res.data);
+        if(res.data.successmsg){
+          alert(res.data.successmsg);
+        }
+        else if(res.data.errmsg){
+          alert(res.data.errmsg);
+        }
+      })
+      .catch(err =>{
+        console.log("SCRAP ADD ERR.RESPONSE", err.response);
         alert(err.response.status + '' + err.response.statusText);
       });
     },

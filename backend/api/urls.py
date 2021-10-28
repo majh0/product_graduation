@@ -9,6 +9,10 @@ urlpatterns = [
     path('post/<int:pk>/', views.ApiPostDV.as_view(), name='post_detail'),
     path('tag/cloud/', views.ApiTagCloudLV.as_view(), name='tag_cloud'),
 
+    path('post/scrap/', views.ApiPostScrapLV.as_view(), name='post_scrap'),
+    path('post/<int:post_id>/scrap/delete/', views.ApiPostScrapDView.as_view(), name='post_scrap_delete'),
+    path('post/<int:post_id>/scrap/add/', views.ApiPostScrapAddView.as_view(), name='post_scrap_add'),
+
     path('login/', views.ApiLoginView.as_view(), name='login'),
     path('register/', views.ApiRegisterView.as_view(), name='register'),
     path('logout/', views.ApiLogoutView.as_view(), name='logout'),

@@ -31,9 +31,6 @@
       <v-btn text href="/">HOME</v-btn>
       <v-btn text href="/blog/post/list/">Article</v-btn>
       <v-btn text href="/admin/">Admin</v-btn>
-      <!-- <v-btn text>/</v-btn>
-      <v-btn text href="/post_list.html">PostList</v-btn>
-      <v-btn text href="/post_detail.html">PostDetail</v-btn> -->
       <v-spacer></v-spacer>
 
       <v-menu offset-y left bottom>
@@ -55,15 +52,15 @@
               >
             </v-list-item>
           </template>
-          <!-- 로그인을 했다면 v-else 쪽 탬플릿을 랜더링한다. -->
           <template v-else>
             <v-list-item @click="logout">
               <v-list-item-title>Logout</v-list-item-title>
             </v-list-item>
             <v-list-item>
-              <v-list-item-title @click="dialogOpen('pwdchg')"
-                >Password change</v-list-item-title
-              >
+              <v-list-item-title @click="dialogOpen('pwdchg')">Password change</v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title @click="moveScrap()">Scrap</v-list-item-title>
             </v-list-item>
           </template>
         </v-list>
@@ -71,8 +68,6 @@
     </v-app-bar>
 
     <!-- v-dialog 로그인을 위한 팝업창 -->
-    <!-- vue를 이용하여 form을 만들때는 name속성이 중요하다 아예 디비의 컬럼이름과 같게한다고 생각한다. -->
-    <!-- id 속성은 있어도 상관없지만 사용하지 않으므로 없엔다. -->
     <v-dialog v-model="dialog.login" max-width="600">
       <v-card class="elevation-12">
         <v-toolbar dark color="primary">
@@ -192,7 +187,6 @@
 import axios from "axios";
 import EventBus from './event_bus';
 
-// 이 두 라인의 의미는 axios로 두 요청을 보낼때, csrftoken이라는 이름을가진 쿠키를 읽어서 요청헤더인 X-CSRFToken에 넣어서 보내라는 의미이다.
 axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFToken";
 
@@ -210,14 +204,10 @@ export default {
     this.getUserInfo();
   },
 
-  // 데이터의 내용이 바뀔때마다 알려주는 기능 watch
   watch: {
-    // 이 것의 의미는 me 변수의 내용이 바뀔때마다, 함수 안의 내용을 실행하라는 의미이다.
-    // 두인자를 받는데 하나는 새로 바뀐인자 다른 하나는 바뀌기 전 인자이다.
     me(newVal, oldVal){
       console.log("watch.me()...", newVal, oldVal);
       EventBus.$emit('me_change', newVal);
-      // 데이터를 보내려는데 이벤트 이름은 me_change이고 보내주는 값은 newVal이다.
     }
   },
   methods: {
@@ -265,7 +255,6 @@ export default {
 
     login() {
       console.log("login()...");
-      // es6 문법으로 var대신 const사용
       const postData = new FormData(document.getElementById("login-form"));
       axios
         .post("/api/login/", postData)
@@ -281,14 +270,12 @@ export default {
     },
     register() {
       console.log("register()...");
-      // es6 문법으로 var대신 const사용
       const postData = new FormData(document.getElementById("register-form"));
       axios
         .post("/api/register/", postData)
         .then((res) => {
           console.log("REGISTER POST RES", res);
           alert(`user: ${res.data.username} created OK`);
-          // this.me = res.data;
         })
         .catch((err) => {
           console.log("REGISTER POST ERR.RESPONSE", err.response);
@@ -311,7 +298,6 @@ export default {
     },
     pwdchg() {
       console.log("pwdchg()...");
-      // es6 문법으로 var대신 const사용
       const postData = new FormData(document.getElementById("pwdchg-form"));
       axios
         .post("/api/pwdchg/", postData)
@@ -336,6 +322,10 @@ export default {
           console.log("GET USER INFO GET ERR.RESPONSE", err.response);
           alert(err.response.status + "" + err.response.statusText);
         });
+    },
+    moveScrap(){
+      console.log("moveScrap()...");
+      location.href = `/blog/post/scrap/`;
     },
   },
 };
